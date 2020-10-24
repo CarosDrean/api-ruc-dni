@@ -1,3 +1,4 @@
+import os
 from operator import itemgetter
 from os import remove
 import cv2
@@ -16,6 +17,7 @@ def get_img(s, captcha_url):
     file_name = 'captcha.jpg'
     captcha = s.get(captcha_url, headers=headers)
     f = open(file_name, 'wb')
+    os.chmod(file_name, 777)
     f.write(captcha.content)
     f.close()
 
