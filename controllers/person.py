@@ -16,6 +16,11 @@ def get_person(dni):
     return first_intent(dni)
 
 
+def get_person_card_immigration(card):
+    type_document = '03'
+    return end_intent(type_document, card)
+
+
 def first_intent(dni):
     return make_request(dni)
 
@@ -49,7 +54,8 @@ def petition(s, txt_captcha, dni):
         return response
     if 'El codigo es incorrecto' not in r.text and txt_captcha.strip():
         if 'No se encontraron registros' in r.text:
-            return end_intent(dni)
+            type_document = '01'
+            return end_intent(type_document, dni)
         print('Data obtenida:')
         person = scrapping_data(r)
         response['data'] = person.__dict__
@@ -113,8 +119,8 @@ def lastnames_cases(lastname: str):
     return lastname, mother_lastname
 
 
-def end_intent(dni):
-    route = 'https://siscovid.minsa.gob.pe/ficha/api/buscar-documento/01/%s/' % dni
+def end_intent(type_document, document):
+    route = 'https://siscovid.minsa.gob.pe/ficha/api/buscar-documento/%s/%s/' % (type_document, document)
     r = requests.get(route)
     j = json.loads(r.text)
     data = j['datos']['data']
