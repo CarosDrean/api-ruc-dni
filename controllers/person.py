@@ -72,7 +72,10 @@ def scrapping_data(page):
     dni = td[7].get_text()
     birthday = get_fn(td[11].get_text())
     age = get_age(birthday)
-    person = Person(name, lastname, mother_last_name, age, birthday, dni, 'none')
+    sex = td[11].get_text()[6:7]
+    if '0' in sex:
+        sex = '2'
+    person = Person(name, lastname, mother_last_name, age, birthday, dni, 'none', '01', sex)
     return person
 
 
@@ -128,7 +131,7 @@ def end_intent(dni):
         person = Person(
             data['nombres'], data['apellido_paterno'], data['apellido_materno'], age, birthday,
             data['numero_documento'],
-            'none'
+            'none', data['tipo_documento'], data['sexo']
         )
         response['data'] = person.__dict__
         response['message'] = 'Encontrado'
