@@ -17,7 +17,7 @@ def get_contributor(ruc):
 
 def make_request(ruc):
     s = requests.session()
-    captcha_url = url + 'captcha?accion=image&nmagic=8236'
+    captcha_url = url + 'captcha?accion=image'
     get_img(s, captcha_url)
     txt_captcha = solve_captcha_simple()
     return petition(s, txt_captcha, ruc)
@@ -33,13 +33,12 @@ def petition(s, txt_captcha, ruc):
         'accion': 'consPorRuc',
         'nroRuc': '%s' % ruc,
         'contexto': 'ti-it',
-        'modo': '1',
-        'rbtnTipo': '1',
+        'tQuery': 'on',
         'search1': '%s' % ruc,
         'tipdoc': '1',
         'codigo': '%s' % txt_captcha[:-2]
     }
-    post_url = url + 'jcrS03Alias'
+    post_url = url + 'jcrS00Alias'
     r = s.post(post_url, data=post_data, headers=headers)
     if 'El codigo ingresado es incorrecto' not in r.text and txt_captcha.strip():
         print('Data obtenida:')
@@ -53,6 +52,25 @@ def petition(s, txt_captcha, ruc):
 
 
 def scrapping_data(page, s, url_legal_represent):
+    soup = BeautifulSoup(page.content, 'html.parser')
+    td = soup.find_all('td')
+    option = soup.find_all('option')
+    ruc_name: str = td[1].get_text()
+    rn = ruc_name.split('-')
+
+    name = rn[1].strip()
+    ruc = rn[0].strip()
+    main_activity = option[0].get_text()
+    legal_represent = get_legal_represent(s, url_legal_represent, ruc, name)
+    address_fiscal = del_blank(td[16].get_text().strip())
+    if 'HABIDO' in address_fiscal:
+        address_fiscal = td[20].get_text()
+    contributor = Contributor(name, main_activity, legal_represent, address_fiscal, ruc)
+    return contributor
+
+
+def scrapping_data_r(page, s, url_legal_represent):
+    # este codigo hace scarpping al nuevo sistema de consultas de la sunat
     soup = BeautifulSoup(page.content, 'html.parser')
     h4 = soup.find_all('h4')
     p = soup.find_all('p')
