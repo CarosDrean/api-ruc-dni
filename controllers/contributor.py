@@ -38,7 +38,7 @@ def petition(s, txt_captcha, ruc):
         'tipdoc': '1',
         'codigo': '%s' % txt_captcha[:-2]
     }
-    post_url = url + 'jcrS00Alias'
+    post_url = url + 'jcrS03Alias'
     r = s.post(post_url, data=post_data, headers=headers)
     if 'El codigo ingresado es incorrecto' not in r.text and txt_captcha.strip():
         print('Data obtenida:')
@@ -55,16 +55,23 @@ def scrapping_data(page, s, url_legal_represent):
     soup = BeautifulSoup(page.content, 'html.parser')
     td = soup.find_all('td')
     option = soup.find_all('option')
-    ruc_name: str = td[1].get_text()
+    count = 0
+    '''for i in td:
+        print('=====================================')
+        print(count)
+        print(i)
+        count = count + 1'''
+
+    ruc_name: str = td[6].get_text()
     rn = ruc_name.split('-')
 
     name = rn[1].strip()
     ruc = rn[0].strip()
     main_activity = option[0].get_text()
     legal_represent = get_legal_represent(s, url_legal_represent, ruc, name)
-    address_fiscal = del_blank(td[16].get_text().strip())
+    address_fiscal = del_blank(td[18].get_text().strip())
     if 'HABIDO' in address_fiscal:
-        address_fiscal = td[20].get_text()
+        address_fiscal = del_blank(td[20].get_text())
     contributor = Contributor(name, main_activity, legal_represent, address_fiscal, ruc)
     return contributor
 
@@ -85,7 +92,7 @@ def scrapping_data_r(page, s, url_legal_represent):
     legal_represent = get_legal_represent(s, url_legal_represent, ruc, name)
     address_fiscal = del_blank(p[5].get_text().strip())
     if 'HABIDO' in address_fiscal:
-        address_fiscal = p[6].get_text().strip()
+        address_fiscal = del_blank(p[6].get_text().strip())
 
     contributor = Contributor(name, main_activity, legal_represent, address_fiscal, ruc)
     return contributor
